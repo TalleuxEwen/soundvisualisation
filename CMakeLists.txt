@@ -4,4 +4,6 @@ project(soundvisualisation)
 set(CMAKE_CXX_STANDARD 14)
 
 add_executable(soundvisualisation
-        src/main.cpp)
+        src/main.cpp
+        src/Parser/Parser.cpp
+        src/Parser/Parser.hpp)
