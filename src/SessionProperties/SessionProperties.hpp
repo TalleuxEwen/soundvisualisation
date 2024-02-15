@@ -16,7 +16,7 @@ enum DIRECTION {
     RIGHT
 };
 
-std::array<std::string, 4> DIRECTION_STR = {
+static std::array<std::string, 4> DIRECTION_STR = {
     "up",
     "down",
     "left",
