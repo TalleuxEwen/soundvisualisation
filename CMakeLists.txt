@@ -6,4 +6,6 @@ set(CMAKE_CXX_STANDARD 14)
 add_executable(soundvisualisation
         src/main.cpp
         src/Parser/Parser.cpp
-        src/Parser/Parser.hpp)
+        src/Parser/Parser.hpp
+        src/SessionProperties/SessionProperties.cpp
+        src/SessionProperties/SessionProperties.hpp)
