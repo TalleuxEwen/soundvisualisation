@@ -8,4 +8,7 @@ add_executable(soundvisualisation
         src/Parser/Parser.cpp
         src/Parser/Parser.hpp
         src/SessionProperties/SessionProperties.cpp
-        src/SessionProperties/SessionProperties.hpp)
+        src/SessionProperties/SessionProperties.hpp
+        src/Session/Session.cpp
+        src/Session/Session.hpp
+        src/Colors.hpp)

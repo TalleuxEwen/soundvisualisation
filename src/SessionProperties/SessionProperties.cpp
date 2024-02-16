@@ -13,3 +13,13 @@ void SessionProperties::addSpeaker(int x, int y, DIRECTION direction)
 {
     speakers.emplace_back(x, y, direction);
 }
+
+std::tuple<int, int> SessionProperties::getSurfaceSize() const
+{
+    return surfaceSize;
+}
+
+std::vector<std::tuple<int, int, DIRECTION>> SessionProperties::getSpeakers() const
+{
+    return speakers;
+}
