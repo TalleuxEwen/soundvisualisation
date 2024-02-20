@@ -8,6 +8,8 @@
 #include <menu.h>
 #include <cmath>
 
+static std::pair<int, int> obstacles[0] = {/*{18, 22}, {19, 22}, {20, 22}*/};
+
 void Session::loadFromProperties(std::shared_ptr<SessionProperties> sessionProperties) {
     _sessionProperties = std::move(sessionProperties);
 
@@ -115,7 +117,45 @@ void Session::processValuesDistribution()
 
 void Session::propagateValues(int x, int y, int value, DIRECTION direction)
 {
-    if (direction == UP) {
+    for (int i = 0; i < _map.size(); i++) {
+        for (int j = 0; j < _map[i].size(); j++) {
+            if (_valuesMap[i][j] != -1) {
+                if (i == y && j == x) {
+                    _valuesMap[i][j] = 50;
+                    continue;
+                }
+                for (auto obstacle : obstacles) {
+                    if (i == obstacle.second && j == obstacle.first) {
+                        _valuesMap[i][j] = -6969;
+                        //std::cout << "Obstacle at " << i << " " << j << std::endl;
+                    }
+                }
+                if (_valuesMap[i][j] == -6969) {
+                    continue;
+                }
+                _valuesMap[i][j] = sqrt(pow(x - j, 2) + pow(y - i, 2));
+                _valuesMap[i][j] = 42 - 20 * log10(_valuesMap[i][j]/1);
+
+                // Calcul de l'angle entre la source, le point d'observation et l'obstacle
+                for (auto obstacle : obstacles) {
+                    float angle =
+                        atan2(obstacle.second - y, obstacle.first - x) -
+                        atan2(y - i, x - j);
+                    float angledeg = angle * 180 / M_PI;
+                    //std::cout << "i: " << i << " j: " << j << " angle: " << angledeg << std::endl;
+
+                    float diffraction = 10 * log10(1 + pow(sin(angle), 2));
+
+                    if (diffraction < 0) {
+                        diffraction = 0;
+                    }
+
+                    //_valuesMap[i][j] += diffraction;
+                }
+            }
+        }
+    }
+    /*if (direction == UP) {
         if (y - 1 >= 0 && _valuesMap[y - 1][x] < value - 1) {
             if (_valuesMap[y - 1][x] != -1) {
                 _valuesMap[y - 1][x] = value - 1;
@@ -168,8 +208,8 @@ void Session::propagateValues(int x, int y, int value, DIRECTION direction)
         }
         if (y + 1 < _valuesMap.size() && _valuesMap[y + 1][x] < value - 1) {
             if (_valuesMap[y + 1][x] != -1) {
-                _valuesMap[y + 1][x] = value + 1;
-                propagateValues(x, y + 1, value + 1, DOWN);
+                _valuesMap[y + 1][x] = value - 1;
+                propagateValues(x, y + 1, value - 1, DOWN);
             }
         }
     } else if (direction == RIGHT) {
@@ -191,7 +231,7 @@ void Session::propagateValues(int x, int y, int value, DIRECTION direction)
                 propagateValues(x, y + 1, value - 1, DOWN);
             }
         }
-    }
+    }*/
 }
 
 void Session::colorizeMap()
@@ -202,12 +242,20 @@ void Session::colorizeMap()
     for (int i = 0; i < _map.size(); i++) {
         for (int j = 0; j < _map[i].size(); j++) {
             if (_valuesMap[i][j] != -1) {
-                // 100 is 255 and -100 is 0
-                int colour = 100 - (10 * _valuesMap[i][j]);
-                int percent = 255 * colour / 100;
-                _map[i][j] = color(255-percent, 0, percent) + " " + resetColor();
+                if (_valuesMap[i][j] == -6969) {
+                    _map[i][j] = color(0, 0, 0) + "XX" + resetColor();
+                } else {
+                    // 100 is 255 and -100 is 0
+                    // colour is intensity in the range 0-255
+                    int colour = (int) (255 * _valuesMap[i][j] / 50);
+                    // -360 is 0 and 360 is 255
+                    //int colordeg = (int) (255 * (_valuesMap[i][j] + 360) / 720);
+                    _map[i][j] =
+                        color(colour, 0, 255 - colour) + "  " + resetColor();
+                    //std::cout << i << " " << j << " " << _valuesMap[i][j] << " " << colour << std::endl;
+                }
             } else {
-                _map[i][j] = _map[i][j];
+                _map[i][j] = resetColor() + _map[i][j] + " ";
             }
         }
     }
