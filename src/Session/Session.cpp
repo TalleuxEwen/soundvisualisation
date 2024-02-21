@@ -4,11 +4,101 @@
 
 #include "Session.hpp"
 
+#include <cmath>
 #include <utility>
 #include <menu.h>
 #include <cmath>
 
-static std::pair<int, int> obstacles[0] = {/*{18, 22}, {19, 22}, {20, 22}*/};
+static bool intersect(double vect0[2], double vect1[2], double diag0[2], double daig1[2], double rect[2]) {
+
+    if (vect1[0] - vect0[0] != 0) {
+        double Vecta = (vect1[1] - vect0[1]) / (vect1[0] - vect0[0]);
+        double Vectb = vect0[1] - (Vecta * vect0[0]);
+
+        double Diaga = (daig1[1] - diag0[1]) / (daig1[0] - diag0[0]);
+        double Diagb = diag0[1] - (Diaga * diag0[0]);
+
+        if (Vecta == Diaga) {
+            return false;
+        }
+
+        double x = (Diagb - Vectb) / (Vecta - Diaga);
+        if (x < vect0[0] || x > vect1[0]) {
+            return false;
+        }
+
+        if (x < diag0[0] || x > daig1[0]) {
+            return false;
+        }
+    } else if (vect1[0] - vect0[0] == 0) {
+        vect0[0] += 0.0001;
+        double Vecta = (vect1[1] - vect0[1]) / (vect1[0] - vect0[0]);
+        double Vectb = vect0[1] - (Vecta * vect0[0]);
+
+        double Diaga = (daig1[1] - diag0[1]) / (daig1[0] - diag0[0]);
+        double Diagb = diag0[1] - (Diaga * diag0[0]);
+
+        if (Vecta == Diaga) {
+            return false;
+        }
+
+        double x = (Diagb - Vectb) / (Vecta - Diaga);
+        if (x < vect0[0] || x > vect1[0]) {
+            return false;
+        }
+
+        if (x < diag0[0] || x > daig1[0]) {
+            return false;
+        }
+    }
+
+    return true;
+}
+
+
+
+static bool isBehindObs(double xsource, double ysource, double xobs, double yobs, double xdest, double ydest)
+{
+    double vect0[2] = {xsource + 0.5, ysource + 0.5};
+    double vect1[2] = {xdest + 0.5, ydest + 0.5};
+    double rect[2] = {xobs, yobs};
+
+    double recttopLeft[2] = {rect[0], rect[1]};
+    double recttopRight[2] = {rect[0] + 1, rect[1]};
+    double rectbottomLeft[2] = {rect[0], rect[1] + 1};
+    double rectbottomRight[2] = {rect[0] + 1, rect[1] + 1};
+
+    if (intersect(vect0, vect1, recttopLeft, rectbottomRight, rect)) {
+        return true;
+    }
+
+    if (intersect(vect0, vect1, rectbottomRight, recttopLeft, rect)) {
+        return true;
+    }
+
+    if (intersect(vect1, vect0, recttopLeft, rectbottomRight, rect)) {
+        return true;
+    }
+
+    if (intersect(vect1, vect0, rectbottomRight, recttopLeft, rect)) {
+        return true;
+    }
+
+    if (intersect(vect1, vect0, recttopRight, rectbottomLeft, rect)) {
+        return true;
+    }
+
+    if (intersect(vect1, vect0, rectbottomLeft, recttopRight, rect)) {
+        return true;
+    }
+
+    if (intersect(vect0, vect1, rectbottomLeft, recttopRight, rect)) {
+        return true;
+    }
+
+    return intersect(vect0, vect1, recttopRight, rectbottomLeft, rect);
+
+}
 
 void Session::loadFromProperties(std::shared_ptr<SessionProperties> sessionProperties) {
     _sessionProperties = std::move(sessionProperties);
@@ -121,10 +211,10 @@ void Session::propagateValues(int x, int y, int value, DIRECTION direction)
         for (int j = 0; j < _map[i].size(); j++) {
             if (_valuesMap[i][j] != -1) {
                 if (i == y && j == x) {
-                    _valuesMap[i][j] = 50;
+                    _valuesMap[i][j] = 42;
                     continue;
                 }
-                for (auto obstacle : obstacles) {
+                for (auto obstacle : _sessionProperties->getObstacles()) {
                     if (i == obstacle.second && j == obstacle.first) {
                         _valuesMap[i][j] = -6969;
                         //std::cout << "Obstacle at " << i << " " << j << std::endl;
@@ -133,25 +223,17 @@ void Session::propagateValues(int x, int y, int value, DIRECTION direction)
                 if (_valuesMap[i][j] == -6969) {
                     continue;
                 }
+                double oldvalue = _valuesMap[i][j];
                 _valuesMap[i][j] = sqrt(pow(x - j, 2) + pow(y - i, 2));
                 _valuesMap[i][j] = 42 - 20 * log10(_valuesMap[i][j]/1);
 
                 // Calcul de l'angle entre la source, le point d'observation et l'obstacle
-                for (auto obstacle : obstacles) {
-                    float angle =
-                        atan2(obstacle.second - y, obstacle.first - x) -
-                        atan2(y - i, x - j);
-                    float angledeg = angle * 180 / M_PI;
-                    //std::cout << "i: " << i << " j: " << j << " angle: " << angledeg << std::endl;
-
-                    float diffraction = 10 * log10(1 + pow(sin(angle), 2));
-
-                    if (diffraction < 0) {
-                        diffraction = 0;
+                for (auto obstacle : _sessionProperties->getObstacles()) {
+                    if (isBehindObs(x, y, obstacle.first, obstacle.second, j, i)) {
+                        _valuesMap[i][j] *= 0.85;
                     }
-
-                    //_valuesMap[i][j] += diffraction;
                 }
+                _valuesMap[i][j] = oldvalue + _valuesMap[i][j];
             }
         }
     }
@@ -243,15 +325,20 @@ void Session::colorizeMap()
         for (int j = 0; j < _map[i].size(); j++) {
             if (_valuesMap[i][j] != -1) {
                 if (_valuesMap[i][j] == -6969) {
-                    _map[i][j] = color(0, 0, 0) + "XX" + resetColor();
+                    _map[i][j] = color(0, 0, 0) + "  " + resetColor();
                 } else {
                     // 100 is 255 and -100 is 0
                     // colour is intensity in the range 0-255
-                    int colour = (int) (255 * _valuesMap[i][j] / 50);
+                    int colour = (int) (255 * (_valuesMap[i][j]) / 42);
+                    if (colour < 0) {
+                        colour = 0;
+                    }
+                    if (colour > 255) {
+                        colour = 255;
+                    }
                     // -360 is 0 and 360 is 255
                     //int colordeg = (int) (255 * (_valuesMap[i][j] + 360) / 720);
-                    _map[i][j] =
-                        color(colour, 0, 255 - colour) + "  " + resetColor();
+                    _map[i][j] = color(colour, 0, 255 - colour) + "  " + resetColor();
                     //std::cout << i << " " << j << " " << _valuesMap[i][j] << " " << colour << std::endl;
                 }
             } else {

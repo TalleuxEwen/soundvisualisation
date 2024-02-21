@@ -73,4 +73,10 @@ void Parser::parseLine(const std::string &line)
 
         _sessionProperties->addSpeaker(std::stoi(tokens[1]), std::stoi(tokens[2]), direction);
     }
+    if (tokens[0] == "obstacle:") {
+        if (tokens.size() != 3)
+            throw std::runtime_error("Invalid obstacle");
+
+        _sessionProperties->addObstacle(std::stoi(tokens[1]), std::stoi(tokens[2]));
+    }
 }

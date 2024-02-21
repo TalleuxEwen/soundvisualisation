@@ -38,5 +38,5 @@ class Session
     private:
         std::shared_ptr<SessionProperties> _sessionProperties;
         std::vector<std::vector<std::string>> _map;
-        std::vector<std::vector<float>> _valuesMap;
+        std::vector<std::vector<double>> _valuesMap;
 };
