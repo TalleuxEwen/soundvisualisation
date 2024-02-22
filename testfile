@@ -1,9 +1,29 @@
 surface: 150 80
 speaker: 35 5 down
-speaker: 115 5 down
+speaker: 45 5 down
 obstacle: 74 20
 obstacle: 75 21
 obstacle: 76 22
 obstacle: 75 20
 obstacle: 76 21
 obstacle: 77 22
+
+obstacle: 35 20
+obstacle: 34 20
+obstacle: 36 20
+obstacle: 33 20
+obstacle: 37 20
+obstacle: 32 19
+obstacle: 33 19
+obstacle: 38 19
+obstacle: 37 19
+obstacle: 31 18
+obstacle: 32 18
+obstacle: 39 18
+obstacle: 38 18
+obstacle: 30 17
+obstacle: 40 17
+obstacle: 29 16
+obstacle: 41 16
+obstacle: 28 15
+obstacle: 42 15

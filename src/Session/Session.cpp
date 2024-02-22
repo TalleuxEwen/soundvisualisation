@@ -120,18 +120,34 @@ void Session::loadMap(int width, int height) {
 void Session::loadSpeaker(int x, int y, DIRECTION direction) {
     switch (direction) {
         case UP:
-            _map[y][x] = 'v';
+            _map[y][x] = resetColor() + "v ";
             break;
         case DOWN:
-            _map[y][x] = '^';
+            _map[y][x] = resetColor() + "^ ";
             break;
         case LEFT:
-            _map[y][x] = '>';
+            _map[y][x] = resetColor() + "> ";
             break;
         case RIGHT:
-            _map[y][x] = '<';
+            _map[y][x] = resetColor() + "< ";
             break;
     }
+}
+
+void Session::redisplay()
+{
+    std::flush(std::cout);
+    int height = _map.size();
+    std::cout << "\033[" << height << "A";
+    std::flush(std::cout);
+    for (const auto &row : _map) {
+        std::cout << "\r\033[K";
+        for (const auto &cell : row) {
+            std::cout << cell;
+        }
+        std::cout << std::endl;
+    }
+    std::flush(std::cout);
 }
 
 void Session::display()
@@ -155,7 +171,7 @@ void Session::createValuesMap() {
             if (_map[i][j] == ".") {
                 _valuesMap[i][j] = 0;
             } else {
-                _valuesMap[i][j] = -1;
+                _valuesMap[i][j] = -4242;
             }
         }
     }
@@ -165,7 +181,7 @@ void Session::updateFromValuesMap()
 {
     for (int i = 0; i < _map.size(); i++) {
         for (int j = 0; j < _map[i].size(); j++) {
-            if (_valuesMap[i][j] != -1) {
+            if (_valuesMap[i][j] != -4242) {
                 if (_valuesMap[i][j] >= 10) {
                     _map[i][j] = 'A';
                 } else {
@@ -180,22 +196,22 @@ void Session::processValuesDistribution()
 {
     for (int i = 0; i < _map.size(); i++) {
         for (int j = 0; j < _map[i].size(); j++) {
-            if (_map[i][j] == "v") {
+            if (_map[i][j] == resetColor() + "v ") {
                 if (i - 1 >= 0) {
                     _valuesMap[i - 1][j] = 10;
                     propagateValues(j, i - 1, 10, UP);
                 }
-            } else if (_map[i][j] == "^") {
+            } else if (_map[i][j] == resetColor() + "^ ") {
                 if (i + 1 < _map.size()) {
                     _valuesMap[i + 1][j] = 10;
                     propagateValues(j, i + 1, 10, DOWN);
                 }
-            } else if (_map[i][j] == ">") {
+            } else if (_map[i][j] == resetColor() + "> ") {
                 if (j - 1 >= 0) {
                     _valuesMap[i][j - 1] = 10;
                     propagateValues(j - 1, i, 10, LEFT);
                 }
-            } else if (_map[i][j] == "<") {
+            } else if (_map[i][j] == resetColor() + "< ") {
                 if (j + 1 < _map[i].size()) {
                     _valuesMap[i][j + 1] = 10;
                     propagateValues(j + 1, i, 10, RIGHT);
@@ -209,11 +225,11 @@ void Session::propagateValues(int x, int y, int value, DIRECTION direction)
 {
     for (int i = 0; i < _map.size(); i++) {
         for (int j = 0; j < _map[i].size(); j++) {
-            if (_valuesMap[i][j] != -1) {
-                if (i == y && j == x) {
+            if (_valuesMap[i][j] != -4242) {
+                /*if (i == y && j == x) {
                     _valuesMap[i][j] = 42;
                     continue;
-                }
+                }*/
                 for (auto obstacle : _sessionProperties->getObstacles()) {
                     if (i == obstacle.second && j == obstacle.first) {
                         _valuesMap[i][j] = -6969;
@@ -225,7 +241,10 @@ void Session::propagateValues(int x, int y, int value, DIRECTION direction)
                 }
                 double oldvalue = _valuesMap[i][j];
                 _valuesMap[i][j] = sqrt(pow(x - j, 2) + pow(y - i, 2));
-                _valuesMap[i][j] = 42 - 20 * log10(_valuesMap[i][j]/1);
+                if (_valuesMap[i][j] == 0) {
+                    _valuesMap[i][j] = 0.9;
+                }
+                _valuesMap[i][j] = _loudness - 20 * log10(_valuesMap[i][j]/1);
 
                 // Calcul de l'angle entre la source, le point d'observation et l'obstacle
                 for (auto obstacle : _sessionProperties->getObstacles()) {
@@ -318,12 +337,14 @@ void Session::propagateValues(int x, int y, int value, DIRECTION direction)
 
 void Session::colorizeMap()
 {
+    int overflow = 0;
     // red is high value and blue is low value
     // we will use the 256 color mode
     // colors will be gradient from 1 to 10 between red and blue
     for (int i = 0; i < _map.size(); i++) {
         for (int j = 0; j < _map[i].size(); j++) {
-            if (_valuesMap[i][j] != -1) {
+            overflow = 0;
+            if (_valuesMap[i][j] != -4242) {
                 if (_valuesMap[i][j] == -6969) {
                     _map[i][j] = color(0, 0, 0) + "  " + resetColor();
                 } else {
@@ -334,17 +355,27 @@ void Session::colorizeMap()
                         colour = 0;
                     }
                     if (colour > 255) {
+                        overflow = colour - 255;
                         colour = 255;
+                    }
+                    if (overflow > 255) {
+                        overflow = 255;
                     }
                     // -360 is 0 and 360 is 255
                     //int colordeg = (int) (255 * (_valuesMap[i][j] + 360) / 720);
-                    _map[i][j] = color(colour, 0, 255 - colour) + "  " + resetColor();
+                    _map[i][j] = color(colour, overflow, 255 - colour) + "  " + resetColor();
                     //std::cout << i << " " << j << " " << _valuesMap[i][j] << " " << colour << std::endl;
                 }
-            } else {
-                _map[i][j] = resetColor() + _map[i][j] + " ";
             }
         }
     }
 
+}
+
+void Session::setLoudness(double loudness) {
+    _loudness = loudness;
+}
+
+double Session::getLoudness() const {
+    return _loudness;
 }

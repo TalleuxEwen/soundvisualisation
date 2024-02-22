@@ -3,6 +3,7 @@
 //
 
 #include <iostream>
+#include <unistd.h>
 #include "Parser/Parser.hpp"
 #include "Session/Session.hpp"
 
@@ -11,14 +12,34 @@ int main() {
     Session session;
     parser.loadFile("../testfile");
     parser.parseContent();
+    double loudnessAddingValue = 0.1;
+    double loudness = 42;
+    bool alreadyDisplay = false;
 
-    session.loadFromProperties(parser.getSessionProperties());
-    session.createValuesMap();
-    session.processValuesDistribution();
-    session.updateFromValuesMap();
 
-    session.colorizeMap();
-    session.display();
+    while (true) {
+        if (loudness >= 42 || loudness <= 0) {
+            loudnessAddingValue *= -1;
+        }
+        loudness += loudnessAddingValue;
+        session = Session();
+        session.loadFromProperties(parser.getSessionProperties());
+
+        session.setLoudness(loudness + loudnessAddingValue);
+        session.createValuesMap();
+        session.processValuesDistribution();
+        session.updateFromValuesMap();
+
+        session.colorizeMap();
+        if (!alreadyDisplay) {
+            session.display();
+            alreadyDisplay = true;
+        } else {
+            session.redisplay();
+        }
+        usleep(9000);
+    }
+
 
     return 0;
 }
