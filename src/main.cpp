@@ -7,12 +7,13 @@
 #include "Parser/Parser.hpp"
 #include "Session/Session.hpp"
 
-int main() {
+int main(int argc, char **argv) {
     Parser parser;
     Session session;
-    parser.loadFile("../testfile");
+    parser.parseArguments(argc, argv);
+    parser.loadFile(parser.getFilename());
     parser.parseContent();
-    double loudnessAddingValue = 0.1;
+    double loudnessAddingValue = 0.3;
     double loudness = 42;
     bool alreadyDisplay = false;
 
@@ -37,7 +38,7 @@ int main() {
         } else {
             session.redisplay();
         }
-        usleep(9000);
+        usleep(100);
     }
 
 

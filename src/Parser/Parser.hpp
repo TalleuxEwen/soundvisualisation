@@ -11,6 +11,11 @@
 #include <memory>
 #include "../SessionProperties/SessionProperties.hpp"
 
+enum MODE {
+    LOCAL,
+    REMOTE
+};
+
 class Parser {
     public:
         Parser() = default;
@@ -21,6 +26,10 @@ class Parser {
 
         std::shared_ptr<SessionProperties> getSessionProperties() const;
 
+        void parseArguments(int argc, char **argv);
+
+        std::string getFilename() const;
+
     private:
         std::string _filename;
         std::vector<std::string> _content;
@@ -28,4 +37,5 @@ class Parser {
         std::string _word;
         std::string _delimiter = " ";
         std::shared_ptr<SessionProperties> _sessionProperties = std::make_shared<SessionProperties>();
+        MODE _mode;
 };
