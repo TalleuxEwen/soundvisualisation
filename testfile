@@ -1,13 +1,8 @@
-surface: 100 40
-speaker: 15 5 down 42 0
-speaker: 50 5 down 10 0-1
-speaker: 85 5 down 10 1
-obstacle: 74 20
-obstacle: 75 21
-obstacle: 76 22
-obstacle: 75 20
-obstacle: 76 21
-obstacle: 77 22
+surface: 50 40
+speaker: 10 5 down 42 0
+speaker: 25 5 down 10 0-1
+speaker: 40 5 down 10 1
+
 
 obstacle: 35 20
 obstacle: 34 20
