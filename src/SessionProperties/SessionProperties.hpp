@@ -34,13 +34,14 @@ class SessionProperties {
 
         std::tuple<int, int> getSurfaceSize() const;
 
-        std::vector<std::tuple<int, int, DIRECTION, double, std::vector<int>>> getSpeakers() const;
+        std::vector<std::tuple<int, int, DIRECTION, double, std::vector<int>>> getSpeakers();
 
         void addObstacle(int x, int y);
 
         std::vector<std::pair<int, int>> getObstacles() const;
 
         void setSpeakerLoudness(int index, double loudness);
+        void setSpeakerLoudness(int x, int y, double loudness);
 
     private:
         std::tuple<int, int> surfaceSize;

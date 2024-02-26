@@ -243,7 +243,7 @@ void Session::propagateValues(int x, int y, int value, DIRECTION direction)
                     _valuesMap[i][j] = 0.9999999;
                 }
                 double speakerLoudness = getLoudnessBySpeaker(x, y);
-                std::cout << "Speaker loudness: " << speakerLoudness << std::endl;
+                //std::cout << "Speaker loudness: " << speakerLoudness << std::endl;
                 _valuesMap[i][j] = speakerLoudness - 20 * log10(_valuesMap[i][j]/1);
 
                 for (auto obstacle : _sessionProperties->getObstacles()) {

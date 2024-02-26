@@ -20,7 +20,7 @@ std::tuple<int, int> SessionProperties::getSurfaceSize() const
     return surfaceSize;
 }
 
-std::vector<std::tuple<int, int, DIRECTION, double, std::vector<int>>> SessionProperties::getSpeakers() const
+std::vector<std::tuple<int, int, DIRECTION, double, std::vector<int>>> SessionProperties::getSpeakers()
 {
     return speakers;
 }
@@ -38,4 +38,16 @@ std::vector<std::pair<int, int>> SessionProperties::getObstacles() const
 void SessionProperties::setSpeakerLoudness(int index, double loudness)
 {
     std::get<3>(speakers[index]) = loudness;
+}
+
+void SessionProperties::setSpeakerLoudness(int x, int y, double loudness)
+{
+    for (auto &speaker : speakers)
+    {
+        if (std::get<0>(speaker) == x && std::get<1>(speaker) == y)
+        {
+            std::get<3>(speaker) = loudness;
+            return;
+        }
+    }
 }

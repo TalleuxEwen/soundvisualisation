@@ -34,7 +34,7 @@ void Parser::parseContent()
     }
 }
 
-std::shared_ptr<SessionProperties> Parser::getSessionProperties() const {
+std::shared_ptr<SessionProperties> Parser::getSessionProperties() {
     return _sessionProperties;
 }
 

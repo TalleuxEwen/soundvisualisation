@@ -24,7 +24,7 @@ class Parser {
         void parseContent();
         void parseLine(const std::string &line);
 
-        std::shared_ptr<SessionProperties> getSessionProperties() const;
+        std::shared_ptr<SessionProperties> getSessionProperties();
 
         void parseArguments(int argc, char **argv);
 

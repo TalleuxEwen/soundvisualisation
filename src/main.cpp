@@ -22,14 +22,14 @@ int main(int argc, char **argv) {
         //Network network;
         while (true) {
             //double *received = network.receive();
-            double received[2] = {0, 42};
+            double received[2] = {22, 0};
             session = Session();
 
             for (auto speaker : parser.getSessionProperties()->getSpeakers()) {
                 if (std::get<4>(speaker).size() == 1) {
-                    std::cout << "received[std::get<4>(speaker)[0]] = " << received[std::get<4>(speaker)[0]] << std::endl;
-                    std::get<3>(speaker) = received[std::get<4>(speaker)[0]];
-                    std::cout << "std::get<3>(speaker) = " << std::get<3>(speaker) << std::endl;
+                    //std::cout << "received[std::get<4>(speaker)[0]] = " << received[std::get<4>(speaker)[0]] << std::endl;
+                    parser.getSessionProperties()->setSpeakerLoudness(std::get<0>(speaker), std::get<1>(speaker), received[std::get<4>(speaker)[0]]);
+                    //std::cout << "std::get<3>(speaker) = " << std::get<3>(speaker) << std::endl;
                 } else {
                     double maxLoudness = 0;
                     for (auto channel : std::get<4>(speaker)) {
@@ -37,7 +37,7 @@ int main(int argc, char **argv) {
                             maxLoudness = received[channel];
                         }
                     }
-                    std::get<3>(speaker) = maxLoudness;
+                    parser.getSessionProperties()->setSpeakerLoudness(std::get<0>(speaker), std::get<1>(speaker), maxLoudness);
                 }
             }
             session.loadFromProperties(parser.getSessionProperties());
