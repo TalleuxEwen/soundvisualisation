@@ -6,18 +6,39 @@
 #include <unistd.h>
 #include "Parser/Parser.hpp"
 #include "Session/Session.hpp"
+#include "Network/Network.hpp"
 
-int main() {
+int main(int argc, char **argv) {
     Parser parser;
     Session session;
-    parser.loadFile("../testfile");
+    parser.parseArguments(argc, argv);
+    parser.loadFile(parser.getFilename());
     parser.parseContent();
-    double loudnessAddingValue = 1;
+    double loudnessAddingValue = 0.3;
     double loudness = 42;
     bool alreadyDisplay = false;
 
+    if (parser.getMode() == REMOTE) {
+        Network network;
+        while (network.isConnected()) {
+            double *received = network.receive();
+            session.loadFromProperties(parser.getSessionProperties());
+            parser.getSessionProperties()->setSpeakerLoudness(0, 42);
 
-    while (true) {
+        }
+    } else if (parser.getMode() == LOCAL) {
+        session.loadFromProperties(parser.getSessionProperties());
+
+        //session.setLoudness(loudness + loudnessAddingValue);
+        session.createValuesMap();
+        session.processValuesDistribution();
+        session.updateFromValuesMap();
+
+        session.colorizeMap();
+        session.display();
+    }
+
+    /*while (true) {
         if (loudness >= 42 || loudness <= 0) {
             loudnessAddingValue *= -1;
         }
@@ -37,8 +58,8 @@ int main() {
         } else {
             session.redisplay();
         }
-        usleep(500000);
-    }
+        usleep(100000);
+    }*/
 
 
     return 0;

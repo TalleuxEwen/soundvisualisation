@@ -80,3 +80,26 @@ void Parser::parseLine(const std::string &line)
         _sessionProperties->addObstacle(std::stoi(tokens[1]), std::stoi(tokens[2]));
     }
 }
+
+void Parser::parseArguments(int argc, char **argv)
+{
+    if (argc != 3)
+        throw std::runtime_error("Invalid number of arguments");
+
+    _filename = argv[1];
+
+    if (std::string(argv[2]) == "--local")
+        _mode = MODE::LOCAL;
+    else if (std::string(argv[2]) == "--remote")
+        _mode = MODE::REMOTE;
+    else
+        throw std::runtime_error("Invalid mode");
+}
+
+std::string Parser::getFilename() const {
+    return _filename;
+}
+
+MODE Parser::getMode() const {
+    return _mode;
+}
