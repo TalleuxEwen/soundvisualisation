@@ -9,9 +9,9 @@ void SessionProperties::setSurfaceSize(int width, int height)
     surfaceSize = {width, height};
 }
 
-void SessionProperties::addSpeaker(int x, int y, DIRECTION direction)
+void SessionProperties::addSpeaker(int x, int y, DIRECTION direction, double loudness, std::vector<int> channels)
 {
-    speakers.emplace_back(x, y, direction, 0);
+    speakers.emplace_back(x, y, direction, loudness, channels);
     obstacles.emplace_back(x, y);
 }
 
@@ -20,7 +20,7 @@ std::tuple<int, int> SessionProperties::getSurfaceSize() const
     return surfaceSize;
 }
 
-std::vector<std::tuple<int, int, DIRECTION, double>> SessionProperties::getSpeakers() const
+std::vector<std::tuple<int, int, DIRECTION, double, std::vector<int>>> SessionProperties::getSpeakers() const
 {
     return speakers;
 }

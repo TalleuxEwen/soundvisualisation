@@ -41,6 +41,8 @@ class Session
 
         double getLoudnessBySpeaker(int x, int y) const;
 
+
+
     private:
         std::shared_ptr<SessionProperties> _sessionProperties;
         std::vector<std::vector<std::string>> _map;

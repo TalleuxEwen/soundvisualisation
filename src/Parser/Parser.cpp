@@ -60,7 +60,7 @@ void Parser::parseLine(const std::string &line)
         _sessionProperties->setSurfaceSize(std::stoi(tokens[1]), std::stoi(tokens[2]));
     }
     if (tokens[0] == "speaker:") {
-        if (tokens.size() != 4)
+        if (tokens.size() != 6)
             throw std::runtime_error("Invalid speaker");
 
         DIRECTION direction;
@@ -71,7 +71,17 @@ void Parser::parseLine(const std::string &line)
         else
             direction = DIRECTION::DOWN;
 
-        _sessionProperties->addSpeaker(std::stoi(tokens[1]), std::stoi(tokens[2]), direction);
+        std::vector<int> channels;
+
+        std::string channelsToken = tokens[5];
+        std::istringstream channelsStream(channelsToken);
+        std::string channel;
+        while (std::getline(channelsStream, channel, '-'))
+        {
+            channels.push_back(std::stoi(channel));
+        }
+
+        _sessionProperties->addSpeaker(std::stoi(tokens[1]), std::stoi(tokens[2]), direction, (double)std::stoi(tokens[4]), channels);
     }
     if (tokens[0] == "obstacle:") {
         if (tokens.size() != 3)

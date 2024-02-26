@@ -19,23 +19,44 @@ int main(int argc, char **argv) {
     bool alreadyDisplay = false;
 
     if (parser.getMode() == REMOTE) {
-        Network network;
-        while (network.isConnected()) {
-            double *received = network.receive();
-            session.loadFromProperties(parser.getSessionProperties());
-            parser.getSessionProperties()->setSpeakerLoudness(0, 42);
+        //Network network;
+        while (true) {
+            //double *received = network.receive();
+            double received[2] = {0, 42};
+            session = Session();
 
+            for (auto speaker : parser.getSessionProperties()->getSpeakers()) {
+                if (std::get<4>(speaker).size() == 1) {
+                    std::cout << "received[std::get<4>(speaker)[0]] = " << received[std::get<4>(speaker)[0]] << std::endl;
+                    std::get<3>(speaker) = received[std::get<4>(speaker)[0]];
+                    std::cout << "std::get<3>(speaker) = " << std::get<3>(speaker) << std::endl;
+                } else {
+                    double maxLoudness = 0;
+                    for (auto channel : std::get<4>(speaker)) {
+                        if (received[channel] > maxLoudness) {
+                            maxLoudness = received[channel];
+                        }
+                    }
+                    std::get<3>(speaker) = maxLoudness;
+                }
+            }
+            session.loadFromProperties(parser.getSessionProperties());
+            session.createValuesMap();
+            session.processValuesDistribution();
+
+            session.colorizeMap();
+            if (!alreadyDisplay) {
+                session.display();
+                alreadyDisplay = true;
+            } else {
+                session.redisplay();
+            }
         }
     } else if (parser.getMode() == LOCAL) {
-        parser.getSessionProperties()->setSpeakerLoudness(1, 0);
-        parser.getSessionProperties()->setSpeakerLoudness(0, 42);
         session.loadFromProperties(parser.getSessionProperties());
 
-
-        //session.setLoudness(loudness + loudnessAddingValue);
         session.createValuesMap();
         session.processValuesDistribution();
-        //session.updateFromValuesMap();
 
         session.colorizeMap();
         session.display();
