@@ -243,6 +243,7 @@ void Session::propagateValues(int x, int y, int value, DIRECTION direction)
                     _valuesMap[i][j] = 0.9;
                 }
                 double speakerLoudness = getLoudnessBySpeaker(x, y);
+                //std::cout << "Speaker loudness: " << speakerLoudness << std::endl;
                 _valuesMap[i][j] = speakerLoudness - 20 * log10(_valuesMap[i][j]/1);
 
                 for (auto obstacle : _sessionProperties->getObstacles()) {
@@ -250,7 +251,14 @@ void Session::propagateValues(int x, int y, int value, DIRECTION direction)
                         _valuesMap[i][j] *= 0.85;
                     }
                 }
-                _valuesMap[i][j] = oldvalue + _valuesMap[i][j];
+                //std::cout << "Value: " << _valuesMap[i][j] << " at " << i << " " << j << " from " << x << " " << y << " with loudness " << speakerLoudness << " old value: " << oldvalue << std::endl;
+                if (oldvalue < 0)
+                    _valuesMap[i][j] = _valuesMap[i][j];
+                else if (_valuesMap[i][j] < 0)
+                    _valuesMap[i][j] = oldvalue;
+                else
+                    _valuesMap[i][j] = oldvalue + _valuesMap[i][j];
+
             }
         }
     }

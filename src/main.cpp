@@ -27,12 +27,15 @@ int main(int argc, char **argv) {
 
         }
     } else if (parser.getMode() == LOCAL) {
+        parser.getSessionProperties()->setSpeakerLoudness(1, 0);
+        parser.getSessionProperties()->setSpeakerLoudness(0, 42);
         session.loadFromProperties(parser.getSessionProperties());
+
 
         //session.setLoudness(loudness + loudnessAddingValue);
         session.createValuesMap();
         session.processValuesDistribution();
-        session.updateFromValuesMap();
+        //session.updateFromValuesMap();
 
         session.colorizeMap();
         session.display();
