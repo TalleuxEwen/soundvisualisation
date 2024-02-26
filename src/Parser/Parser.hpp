@@ -30,6 +30,8 @@ class Parser {
 
         std::string getFilename() const;
 
+        MODE getMode() const;
+
     private:
         std::string _filename;
         std::vector<std::string> _content;

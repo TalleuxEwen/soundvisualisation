@@ -244,7 +244,8 @@ void Session::propagateValues(int x, int y, int value, DIRECTION direction)
                 if (_valuesMap[i][j] == 0) {
                     _valuesMap[i][j] = 0.9;
                 }
-                _valuesMap[i][j] = _loudness - 20 * log10(_valuesMap[i][j]/1);
+                double speakerLoudness = getLoudnessBySpeaker(x, y);
+                _valuesMap[i][j] = speakerLoudness - 20 * log10(_valuesMap[i][j]/1);
 
                 // Calcul de l'angle entre la source, le point d'observation et l'obstacle
                 for (auto obstacle : _sessionProperties->getObstacles()) {
@@ -378,4 +379,31 @@ void Session::setLoudness(double loudness) {
 
 double Session::getLoudness() const {
     return _loudness;
+}
+
+double Session::getLoudnessBySpeaker(int x, int y) const {
+    SessionProperties sessionProperties = *_sessionProperties;
+    for (const auto &speaker : sessionProperties.getSpeakers()) {
+        if (std::get<2>(speaker) == UP) {
+            if (std::get<0>(speaker) == x && std::get<1>(speaker) == y + 1) {
+                return std::get<3>(speaker);
+            }
+        }
+        if (std::get<2>(speaker) == DOWN) {
+            if (std::get<0>(speaker) == x && std::get<1>(speaker) == y - 1) {
+                return std::get<3>(speaker);
+            }
+        }
+        if (std::get<2>(speaker) == LEFT) {
+            if (std::get<0>(speaker) == x - 1 && std::get<1>(speaker) == y) {
+                return std::get<3>(speaker);
+            }
+        }
+        if (std::get<2>(speaker) == RIGHT) {
+            if (std::get<0>(speaker) == x + 1 && std::get<1>(speaker) == y) {
+                return std::get<3>(speaker);
+            }
+        }
+    }
+    return 0;
 }

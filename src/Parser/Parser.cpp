@@ -99,3 +99,7 @@ void Parser::parseArguments(int argc, char **argv)
 std::string Parser::getFilename() const {
     return _filename;
 }
+
+MODE Parser::getMode() const {
+    return _mode;
+}

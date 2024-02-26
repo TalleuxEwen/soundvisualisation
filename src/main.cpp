@@ -6,6 +6,7 @@
 #include <unistd.h>
 #include "Parser/Parser.hpp"
 #include "Session/Session.hpp"
+#include "Network/Network.hpp"
 
 int main(int argc, char **argv) {
     Parser parser;
@@ -17,8 +18,27 @@ int main(int argc, char **argv) {
     double loudness = 42;
     bool alreadyDisplay = false;
 
+    if (parser.getMode() == REMOTE) {
+        Network network;
+        while (network.isConnected()) {
+            double *received = network.receive();
+            session.loadFromProperties(parser.getSessionProperties());
+            parser.getSessionProperties()->setSpeakerLoudness(0, 42);
 
-    while (true) {
+        }
+    } else if (parser.getMode() == LOCAL) {
+        session.loadFromProperties(parser.getSessionProperties());
+
+        //session.setLoudness(loudness + loudnessAddingValue);
+        session.createValuesMap();
+        session.processValuesDistribution();
+        session.updateFromValuesMap();
+
+        session.colorizeMap();
+        session.display();
+    }
+
+    /*while (true) {
         if (loudness >= 42 || loudness <= 0) {
             loudnessAddingValue *= -1;
         }
@@ -39,7 +59,7 @@ int main(int argc, char **argv) {
             session.redisplay();
         }
         usleep(100);
-    }
+    }*/
 
 
     return 0;

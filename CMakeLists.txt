@@ -11,4 +11,6 @@ add_executable(soundvisualisation
         src/SessionProperties/SessionProperties.hpp
         src/Session/Session.cpp
         src/Session/Session.hpp
-        src/Colors.hpp)
+        src/Colors.hpp
+        src/Network/Network.cpp
+        src/Network/Network.hpp)

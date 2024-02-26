@@ -39,6 +39,7 @@ class Session
 
         double getLoudness() const;
 
+        double getLoudnessBySpeaker(int x, int y) const;
 
     private:
         std::shared_ptr<SessionProperties> _sessionProperties;
