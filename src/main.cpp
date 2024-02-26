@@ -12,7 +12,7 @@ int main() {
     Session session;
     parser.loadFile("../testfile");
     parser.parseContent();
-    double loudnessAddingValue = 0.1;
+    double loudnessAddingValue = 1;
     double loudness = 42;
     bool alreadyDisplay = false;
 
@@ -22,7 +22,7 @@ int main() {
             loudnessAddingValue *= -1;
         }
         loudness += loudnessAddingValue;
-        session = Session();
+        //session = Session();
         session.loadFromProperties(parser.getSessionProperties());
 
         session.setLoudness(loudness + loudnessAddingValue);
@@ -37,7 +37,7 @@ int main() {
         } else {
             session.redisplay();
         }
-        usleep(9000);
+        usleep(500000);
     }
 
 

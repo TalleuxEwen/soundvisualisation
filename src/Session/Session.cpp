@@ -148,6 +148,7 @@ void Session::redisplay()
         std::cout << std::endl;
     }
     std::flush(std::cout);
+    _map.clear();
 }
 
 void Session::display()
@@ -158,9 +159,11 @@ void Session::display()
         }
         std::cout << std::endl;
     }
+    _map.clear();
 }
 
 void Session::createValuesMap() {
+    _valuesMap.clear();
     _valuesMap.resize(_map.size());
     for (int i = 0; i < _map.size(); i++) {
         _valuesMap[i].resize(_map[i].size(), 0);
@@ -226,14 +229,9 @@ void Session::propagateValues(int x, int y, int value, DIRECTION direction)
     for (int i = 0; i < _map.size(); i++) {
         for (int j = 0; j < _map[i].size(); j++) {
             if (_valuesMap[i][j] != -4242) {
-                /*if (i == y && j == x) {
-                    _valuesMap[i][j] = 42;
-                    continue;
-                }*/
                 for (auto obstacle : _sessionProperties->getObstacles()) {
                     if (i == obstacle.second && j == obstacle.first) {
                         _valuesMap[i][j] = -6969;
-                        //std::cout << "Obstacle at " << i << " " << j << std::endl;
                     }
                 }
                 if (_valuesMap[i][j] == -6969) {
@@ -246,7 +244,6 @@ void Session::propagateValues(int x, int y, int value, DIRECTION direction)
                 }
                 _valuesMap[i][j] = _loudness - 20 * log10(_valuesMap[i][j]/1);
 
-                // Calcul de l'angle entre la source, le point d'observation et l'obstacle
                 for (auto obstacle : _sessionProperties->getObstacles()) {
                     if (isBehindObs(x, y, obstacle.first, obstacle.second, j, i)) {
                         _valuesMap[i][j] *= 0.85;
@@ -256,91 +253,12 @@ void Session::propagateValues(int x, int y, int value, DIRECTION direction)
             }
         }
     }
-    /*if (direction == UP) {
-        if (y - 1 >= 0 && _valuesMap[y - 1][x] < value - 1) {
-            if (_valuesMap[y - 1][x] != -1) {
-                _valuesMap[y - 1][x] = value - 1;
-                propagateValues(x, y - 1, value - 1, UP);
-            }
-        }
-        if (x - 1 >= 0 && _valuesMap[y][x - 1] < value - 1) {
-            if (_valuesMap[y][x - 1] != -1) {
-                _valuesMap[y][x - 1] = value - 1;
-                propagateValues(x - 1, y, value - 1, LEFT);
-            }
-        }
-        if (x + 1 < _valuesMap[y].size() && _valuesMap[y][x + 1] < value - 1) {
-            if (_valuesMap[y][x + 1] != -1) {
-                _valuesMap[y][x + 1] = value - 1;
-                propagateValues(x + 1, y, value - 1, RIGHT);
-            }
-        }
-    } else if (direction == DOWN) {
-        if (y + 1 < _valuesMap.size() && _valuesMap[y + 1][x] < value - 1) {
-            if (_valuesMap[y + 1][x] != -1) {
-                _valuesMap[y + 1][x] = value - 1;
-                propagateValues(x, y + 1, value - 1, DOWN);
-            }
-        }
-        if (x - 1 >= 0 && _valuesMap[y][x - 1] < value - 1) {
-            if (_valuesMap[y][x - 1] != -1) {
-                _valuesMap[y][x - 1] = value - 1;
-                propagateValues(x - 1, y, value - 1, LEFT);
-            }
-        }
-        if (x + 1 < _valuesMap[y].size() && _valuesMap[y][x + 1] < value - 1) {
-            if (_valuesMap[y][x + 1] != -1) {
-                _valuesMap[y][x + 1] = value - 1;
-                propagateValues(x + 1, y, value - 1, RIGHT);
-            }
-        }
-    } else if (direction == LEFT) {
-        if (x - 1 >= 0 && _valuesMap[y][x - 1] < value - 1) {
-            if (_valuesMap[y][x - 1] != -1) {
-                _valuesMap[y][x - 1] = value - 1;
-                propagateValues(x - 1, y, value - 1, LEFT);
-            }
-        }
-        if (y - 1 >= 0 && _valuesMap[y - 1][x] < value - 1) {
-            if (_valuesMap[y - 1][x] != -1) {
-                _valuesMap[y - 1][x] = value - 1;
-                propagateValues(x, y - 1, value - 1, UP);
-            }
-        }
-        if (y + 1 < _valuesMap.size() && _valuesMap[y + 1][x] < value - 1) {
-            if (_valuesMap[y + 1][x] != -1) {
-                _valuesMap[y + 1][x] = value - 1;
-                propagateValues(x, y + 1, value - 1, DOWN);
-            }
-        }
-    } else if (direction == RIGHT) {
-        if (x + 1 < _valuesMap[y].size() && _valuesMap[y][x + 1] < value - 1) {
-            if (_valuesMap[y][x + 1] != -1) {
-                _valuesMap[y][x + 1] = value - 1;
-                propagateValues(x + 1, y, value - 1, RIGHT);
-            }
-        }
-        if (y - 1 >= 0 && _valuesMap[y - 1][x] < value - 1) {
-            if (_valuesMap[y - 1][x] != -1) {
-                _valuesMap[y - 1][x] = value - 1;
-                propagateValues(x, y - 1, value - 1, UP);
-            }
-        }
-        if (y + 1 < _valuesMap.size() && _valuesMap[y + 1][x] < value - 1) {
-            if (_valuesMap[y + 1][x] != -1) {
-                _valuesMap[y + 1][x] = value - 1;
-                propagateValues(x, y + 1, value - 1, DOWN);
-            }
-        }
-    }*/
 }
 
 void Session::colorizeMap()
 {
     int overflow = 0;
-    // red is high value and blue is low value
-    // we will use the 256 color mode
-    // colors will be gradient from 1 to 10 between red and blue
+
     for (int i = 0; i < _map.size(); i++) {
         for (int j = 0; j < _map[i].size(); j++) {
             overflow = 0;
@@ -348,8 +266,6 @@ void Session::colorizeMap()
                 if (_valuesMap[i][j] == -6969) {
                     _map[i][j] = color(0, 0, 0) + "  " + resetColor();
                 } else {
-                    // 100 is 255 and -100 is 0
-                    // colour is intensity in the range 0-255
                     int colour = (int) (255 * (_valuesMap[i][j]) / 42);
                     if (colour < 0) {
                         colour = 0;
@@ -361,10 +277,7 @@ void Session::colorizeMap()
                     if (overflow > 255) {
                         overflow = 255;
                     }
-                    // -360 is 0 and 360 is 255
-                    //int colordeg = (int) (255 * (_valuesMap[i][j] + 360) / 720);
                     _map[i][j] = color(colour, overflow, 255 - colour) + "  " + resetColor();
-                    //std::cout << i << " " << j << " " << _valuesMap[i][j] << " " << colour << std::endl;
                 }
             }
         }
